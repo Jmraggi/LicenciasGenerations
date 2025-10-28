@@ -13,16 +13,35 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-file-alt"></i>
-                    <h1>Generador de Licencias</h1>
+                <div class="header-top">
+                    <div class="logo">
+                        <i class="fas fa-file-alt"></i>
+                        <h1>Generador de Licencias</h1>
+                    </div>
+                     <!-- Progress Indicator -->
+                    <div class="progress-indicator">
+                        <div class="step active" data-step="1">
+                            <div class="step-number">1</div>
+                            <span>Seleccionar Licencias</span>
+                        </div>
+                        <div class="step" data-step="2">
+                            <div class="step-number">2</div>
+                            <span>Completar Datos</span>
+                        </div>
+                        <div class="step" data-step="3">
+                            <div class="step-number">3</div>
+                            <span>Generar Solicitud</span>
+                        </div>
+                    </div>
+                    <div class="header-info">
+                        <span class="date-info">
+                            <i class="fas fa-calendar"></i>
+                            <span id="currentDate"></span>
+                        </span>
+                    </div>
                 </div>
-                <div class="header-info">
-                    <span class="date-info">
-                        <i class="fas fa-calendar"></i>
-                        <span id="currentDate"></span>
-                    </span>
-                </div>
+                
+               
             </div>
         </div>
     </header>
@@ -30,27 +49,10 @@
     <!-- Main Container -->
     <main class="main-container">
         <div class="container">
-            <!-- Progress Indicator -->
-            <div class="progress-indicator">
-                <div class="step active" data-step="1">
-                    <div class="step-number">1</div>
-                    <span>Seleccionar Licencias</span>
-                </div>
-                <div class="step" data-step="2">
-                    <div class="step-number">2</div>
-                    <span>Completar Datos</span>
-                </div>
-                <div class="step" data-step="3">
-                    <div class="step-number">3</div>
-                    <span>Generar Solicitud</span>
-                </div>
-            </div>
-
             <!-- Step 1: Selección de Licencia -->
             <section id="step1" class="step-content active">
                 <div class="section-header">
-                    <h2><i class="fas fa-list-ul"></i> Seleccionar Tipo de Licencia</h2>
-                    <p>Escolha el tipo de licencia que desea solicitar. Las licencias están organizadas por frecuencia de uso.</p>
+                    <p class="instruction-text">Seleccione la licencia o las licencias que quiere completar</p>
                 </div>
 
 
@@ -63,12 +65,7 @@
 
             <!-- Step 2: Formulario de Datos -->
             <section id="step2" class="step-content">
-                <div class="section-header">
-                    <h2><i class="fas fa-edit"></i> Completar Información de las Licencias</h2>
-                    <p>Configure los datos específicos para cada licencia seleccionada.</p>
-                </div>
-
-                <div class="form-container">
+                <div class="form-container" style="display: flex;">
                     <div class="selected-license-info" id="selectedLicenseInfo">
                         <!-- Info de licencia seleccionada -->
                     </div>
@@ -84,7 +81,6 @@
 
                         <!-- Observaciones -->
                         <div class="form-section">
-                            <h3><i class="fas fa-comment"></i> Observaciones Adicionales</h3>
                             <div class="form-group">
                                 <label for="observaciones">Observaciones (Opcional)</label>
                                 <textarea id="observaciones" rows="4" placeholder="Agregue cualquier información adicional relevante..."></textarea>
@@ -97,9 +93,19 @@
             <!-- Step 3: Generar Solicitud -->
             <section id="step3" class="step-content">
                 <div class="section-header">
-                    <h2><i class="fas fa-file-export"></i> Generar Solicitud</h2>
                     <p>Su solicitud está lista. Puede copiarla como texto o descargar en PDF.</p>
                 </div>
+
+                <!-- Área de texto generado -->
+                    <div class="texto-generado-container" id="textoGeneradoContainer" style="display: none;">
+                        <div class="texto-header">
+                            <h3>Texto de la Solicitud:</h3>
+                            <p class="edit-hint"><i class="fas fa-edit"></i> Puede editar el texto antes de copiarlo</p>
+                        </div>
+                        <div class="texto-preview">
+                            <textarea id="textoGenerado" rows="10" placeholder="El texto de la solicitud aparecerá aquí..."></textarea>
+                        </div>
+                    </div>
 
                 <div class="generation-container">
                     <div class="generation-options">
@@ -108,7 +114,7 @@
                                 <i class="fas fa-copy"></i>
                             </div>
                             <h3>Copiar Texto Plano</h3>
-                            <p>Copie la solicitud como texto para pegar en Word o Google Docs</p>
+                            <p>Copie la solicitud como texto para pegar en Zimbra y enviarle a cfmardelplata.superintendencia@pjn.gov.a</p>
                             <button type="button" class="btn-primary" id="copiarTextoBtn">
                                 <i class="fas fa-copy"></i> Copiar Texto
                             </button>
@@ -126,13 +132,7 @@
                         </div>
                     </div>
 
-                    <!-- Área de texto generado -->
-                    <div class="texto-generado-container" id="textoGeneradoContainer" style="display: none;">
-                        <h3>Texto de la Solicitud:</h3>
-                        <div class="texto-preview">
-                            <textarea id="textoGenerado" readonly rows="15"></textarea>
-                        </div>
-                    </div>
+                    
                 </div>
             </section>
 

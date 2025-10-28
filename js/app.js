@@ -46,14 +46,15 @@ function cargarLicencias() {
         "ART_34_INC_C", // ART. 34 INC. C RAZONES PARTICULARES
         "ART_14",       // Art. 14. COMPENSACIÓN
         "ART_22",       // Art. 22. ENFERMEDAD. AFECCIONES COMUNES
-        "ART_23"        // Art. 23. ENFERMEDAD. AFECCIONES O LESIONES DE LARGO TRATAMIENTO
+        "ART_29"        // Art. 29. Atención de Familiar Enfermo
     ];
     
     const todasLasLicencias = obtenerTodasLasLicencias();
     
-    // Mostrar licencias principales
-    todasLasLicencias.forEach(licencia => {
-        if (licenciasPrincipales.includes(licencia.codigo)) {
+    // Mostrar licencias principales en el orden específico
+    licenciasPrincipales.forEach(codigoLicencia => {
+        const licencia = todasLasLicencias.find(lic => lic.codigo === codigoLicencia);
+        if (licencia) {
             const card = crearTarjetaLicencia(licencia);
             grid.appendChild(card);
         }
@@ -179,9 +180,6 @@ function seleccionarLicencia(id) {
         mostrarToast(`Licencia agregada: ${licencia.nombre}`, 'success');
     }
     
-    // Actualizar contador de selecciones
-    actualizarContadorSelecciones();
-    
     // Habilitar/deshabilitar botón siguiente
     document.getElementById('nextBtn').disabled = selectedLicenses.length === 0;
 }
@@ -197,37 +195,6 @@ function actualizarBotonSeleccion(card, isSelected) {
     }
 }
 
-function actualizarContadorSelecciones() {
-    let contadorElement = document.getElementById('contadorSelecciones');
-    
-    if (!contadorElement) {
-        // Crear contador si no existe
-        contadorElement = document.createElement('div');
-        contadorElement.id = 'contadorSelecciones';
-        contadorElement.className = 'contador-selecciones';
-        
-        const sectionHeader = document.querySelector('#step1 .section-header');
-        sectionHeader.appendChild(contadorElement);
-    }
-    
-    if (selectedLicenses.length === 0) {
-        contadorElement.style.display = 'none';
-    } else {
-        contadorElement.style.display = 'block';
-        contadorElement.innerHTML = `
-            <div class="contador-content">
-                <i class="fas fa-check-circle"></i>
-                <span>${selectedLicenses.length} licencia${selectedLicenses.length > 1 ? 's' : ''} seleccionada${selectedLicenses.length > 1 ? 's' : ''}</span>
-                <button type="button" class="btn-limpiar" onclick="limpiarSelecciones()">
-                    <i class="fas fa-times"></i> Limpiar
-                </button>
-            </div>
-            <div class="lista-seleccionadas">
-                ${selectedLicenses.map(lic => `<span class="licencia-tag">${lic.nombre}</span>`).join('')}
-            </div>
-        `;
-    }
-}
 
 function limpiarSelecciones() {
     selectedLicenses = [];
@@ -235,7 +202,6 @@ function limpiarSelecciones() {
         card.classList.remove('selected');
         actualizarBotonSeleccion(card, false);
     });
-    actualizarContadorSelecciones();
     document.getElementById('nextBtn').disabled = true;
     mostrarToast('Selecciones limpiadas', 'info');
 }
@@ -246,15 +212,7 @@ function prepararFormulario() {
     if (selectedLicenses.length === 1) {
         // Una sola licencia
         const licencia = selectedLicenses[0];
-        infoContainer.innerHTML = `
-            <div class="selected-licenses-summary">
-                <div class="summary-header">
-                    <i class="fas fa-clipboard-check"></i>
-                    <span>${licencia.nombre}</span>
-                </div>
-                <p>Complete las fechas para continuar con la solicitud.</p>
-            </div>
-        `;
+        infoContainer.innerHTML = '';
         
         // Verificar si es compensación para generar el formulario correcto
         if (licencia.codigo === 'ART_14') {
@@ -264,15 +222,7 @@ function prepararFormulario() {
         }
     } else {
         // Múltiples licencias - mostrar formulario separado para cada una
-        infoContainer.innerHTML = `
-            <div class="selected-licenses-summary">
-                <div class="summary-header">
-                    <i class="fas fa-layer-group"></i>
-                    <span>${selectedLicenses.length} licencias seleccionadas</span>
-                </div>
-                <p>Complete las fechas para cada licencia individualmente.</p>
-            </div>
-        `;
+        infoContainer.innerHTML = '';
         generarFormularioMultipleLicencias();
     }
 }
@@ -286,13 +236,18 @@ function generarCamposDinamicos() {
     const container = document.getElementById('camposDinamicos');
     container.innerHTML = '';
     
-    // Solo crear los campos esenciales: fecha_inicio, fecha_fin y cantidad_dias
+    // Crear una fila para los campos esenciales: fecha_inicio, fecha_fin y cantidad_dias
+    const formRow = document.createElement('div');
+    formRow.className = 'form-row';
+    
     const camposEsenciales = ['fecha_inicio', 'fecha_fin', 'cantidad_dias'];
     
     camposEsenciales.forEach(campo => {
         const fieldGroup = crearCampoDinamico(campo);
-        container.appendChild(fieldGroup);
+        formRow.appendChild(fieldGroup);
     });
+    
+    container.appendChild(formRow);
     
     // Configurar el cálculo automático de días
     configurarCalculoAutomaticoDias();
@@ -379,14 +334,44 @@ function crearCampoDinamico(campo) {
             break;
             
         case 'cantidad_dias':
+            // Crear contenedor para input con botones
+            const container = document.createElement('div');
+            container.className = 'number-input-container';
+            
+            const decrementBtn = document.createElement('button');
+            decrementBtn.type = 'button';
+            decrementBtn.className = 'number-btn decrement';
+            decrementBtn.innerHTML = '<i class="fas fa-minus"></i>';
+            decrementBtn.onclick = () => adjustDays(campo, -1);
+            
             input = document.createElement('input');
             input.type = 'number';
             input.id = campo;
             input.name = campo;
             input.readOnly = true;
-            input.className = 'readonly-field';
-            input.placeholder = 'Se calcula automáticamente';
-            break;
+            input.min = '1';
+            input.max = '365';
+            
+            const incrementBtn = document.createElement('button');
+            incrementBtn.type = 'button';
+            incrementBtn.className = 'number-btn increment';
+            incrementBtn.innerHTML = '<i class="fas fa-plus"></i>';
+            incrementBtn.onclick = () => adjustDays(campo, 1);
+            
+            container.appendChild(decrementBtn);
+            container.appendChild(input);
+            container.appendChild(incrementBtn);
+            
+            // Agregar texto helper similar a los campos de fecha
+            const helperText = document.createElement('small');
+            helperText.className = 'help-text';
+            helperText.innerHTML = '<i class="fas fa-info-circle"></i> El sistema no distingue feriados ni fines de semana en este cálculo';
+            
+            // Retornar el contenedor en lugar del input
+            div.appendChild(label);
+            div.appendChild(container);
+            div.appendChild(helperText);
+            return div;
             
         default:
             input = document.createElement('input');
@@ -460,6 +445,20 @@ function formatearEtiqueta(campo) {
     return etiquetas[campo] || campo.replace(/_/g, ' ').toUpperCase();
 }
 
+function adjustDays(inputId, change) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    
+    const currentValue = parseInt(input.value) || 0;
+    const newValue = Math.max(1, Math.min(365, currentValue + change));
+    
+    input.value = newValue;
+    
+    // Disparar evento change para actualizar cálculos si es necesario
+    const event = new Event('change', { bubbles: true });
+    input.dispatchEvent(event);
+}
+
 function configurarCalculoAutomaticoDias() {
     const fechaInicioInput = document.getElementById('fecha_inicio');
     const fechaFinInput = document.getElementById('fecha_fin');
@@ -500,7 +499,7 @@ function obtenerAyudaCampo(campo) {
         'certificado_medico': 'Adjunte o mencione el certificado médico correspondiente',
         'diagnostico': 'Indique el diagnóstico médico detallado',
         'parentesco': 'Seleccione la relación familiar',
-        'cantidad_horas': 'Indique la cantidad total de horas a compensar',
+        'cantidad_dias': 'Indique la cantidad total de días a compensar',
         'nuevo_horario': 'Especifique el nuevo horario de trabajo'
     };
     
@@ -538,13 +537,18 @@ function generarCamposParaLicencia(index) {
     if (licencia.codigo === 'ART_14') {
         generarCamposCompensacion(container, index);
     } else {
-        // Campos normales para otras licencias
+        // Campos normales para otras licencias en una fila compacta
+        const formRow = document.createElement('div');
+        formRow.className = 'form-row';
+        
         const camposEsenciales = ['fecha_inicio', 'fecha_fin', 'cantidad_dias'];
         
         camposEsenciales.forEach(campo => {
             const fieldGroup = crearCampoDinamicoConIndex(campo, index);
-            container.appendChild(fieldGroup);
+            formRow.appendChild(fieldGroup);
         });
+        
+        container.appendChild(formRow);
         
         // Configurar el cálculo automático para esta licencia específica
         configurarCalculoAutomaticoDiasConIndex(index);
@@ -596,25 +600,39 @@ function agregarCompensacion(licenciaIndex) {
             ` : ''}
         </div>
         <div class="compensacion-campos">
-            <div class="form-group">
-                <label for="licencia_origen_${licenciaIndex}_${compensacionIndex}">Licencia que corresponde *</label>
-                <input type="text" id="licencia_origen_${licenciaIndex}_${compensacionIndex}" name="licencia_origen_${licenciaIndex}_${compensacionIndex}" required placeholder="Ej: Art. 22 Enfermedad - Julio 2024">
-                <small class="help-text">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="licencia_origen_${licenciaIndex}_${compensacionIndex}">Licencia que corresponde *</label>
+                    <input type="text" id="licencia_origen_${licenciaIndex}_${compensacionIndex}" name="licencia_origen_${licenciaIndex}_${compensacionIndex}" required placeholder="ENERO 2025">
+                    <small class="help-text">
+                        <i class="fas fa-info-circle"></i> 
+                        Especifique el MES y el AÑO que corresponde
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_inicio_${licenciaIndex}_${compensacionIndex}">Fecha de Inicio *</label>
+                    <input type="date" id="fecha_inicio_${licenciaIndex}_${compensacionIndex}" name="fecha_inicio_${licenciaIndex}_${compensacionIndex}" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha_fin_${licenciaIndex}_${compensacionIndex}">Fecha de Fin *</label>
+                    <input type="date" id="fecha_fin_${licenciaIndex}_${compensacionIndex}" name="fecha_fin_${licenciaIndex}_${compensacionIndex}" required>
+                </div>
+                <div class="form-group">
+                    <label for="cantidad_dias_${licenciaIndex}_${compensacionIndex}">Cantidad de Días</label>
+                    <div class="number-input-container">
+                        <button type="button" class="number-btn decrement" onclick="adjustDays('cantidad_dias_${licenciaIndex}_${compensacionIndex}', -1)">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="number" id="cantidad_dias_${licenciaIndex}_${compensacionIndex}" name="cantidad_dias_${licenciaIndex}_${compensacionIndex}" readonly min="1" max="365">
+                        <button type="button" class="number-btn increment" onclick="adjustDays('cantidad_dias_${licenciaIndex}_${compensacionIndex}', 1)">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <small class="help-text">
                     <i class="fas fa-info-circle"></i> 
-                    Especifique la licencia y período al que corresponde la compensación
+                    El sistema no distingue feriados ni fines de semana en este cálculo
                 </small>
-            </div>
-            <div class="form-group">
-                <label for="fecha_inicio_${licenciaIndex}_${compensacionIndex}">Fecha de Inicio *</label>
-                <input type="date" id="fecha_inicio_${licenciaIndex}_${compensacionIndex}" name="fecha_inicio_${licenciaIndex}_${compensacionIndex}" required>
-            </div>
-            <div class="form-group">
-                <label for="fecha_fin_${licenciaIndex}_${compensacionIndex}">Fecha de Fin *</label>
-                <input type="date" id="fecha_fin_${licenciaIndex}_${compensacionIndex}" name="fecha_fin_${licenciaIndex}_${compensacionIndex}" required>
-            </div>
-            <div class="form-group">
-                <label for="cantidad_dias_${licenciaIndex}_${compensacionIndex}">Cantidad de Días</label>
-                <input type="number" id="cantidad_dias_${licenciaIndex}_${compensacionIndex}" name="cantidad_dias_${licenciaIndex}_${compensacionIndex}" class="readonly-field" readonly placeholder="Se calcula automáticamente">
+                </div>
             </div>
         </div>
     `;
@@ -704,14 +722,44 @@ function crearCampoDinamicoConIndex(campo, index) {
             break;
             
         case 'cantidad_dias':
+            // Crear contenedor para input con botones
+            const container = document.createElement('div');
+            container.className = 'number-input-container';
+            
+            const decrementBtn = document.createElement('button');
+            decrementBtn.type = 'button';
+            decrementBtn.className = 'number-btn decrement';
+            decrementBtn.innerHTML = '<i class="fas fa-minus"></i>';
+            decrementBtn.onclick = () => adjustDays(fieldId, -1);
+            
             input = document.createElement('input');
             input.type = 'number';
             input.id = fieldId;
             input.name = fieldId;
             input.readOnly = true;
-            input.className = 'readonly-field';
-            input.placeholder = 'Se calcula automáticamente';
-            break;
+            input.min = '1';
+            input.max = '365';
+            
+            const incrementBtn = document.createElement('button');
+            incrementBtn.type = 'button';
+            incrementBtn.className = 'number-btn increment';
+            incrementBtn.innerHTML = '<i class="fas fa-plus"></i>';
+            incrementBtn.onclick = () => adjustDays(fieldId, 1);
+            
+            container.appendChild(decrementBtn);
+            container.appendChild(input);
+            container.appendChild(incrementBtn);
+            
+            // Agregar texto helper similar a los campos de fecha
+            const helperText = document.createElement('small');
+            helperText.className = 'help-text';
+            helperText.innerHTML = '<i class="fas fa-info-circle"></i> El sistema no distingue feriados ni fines de semana en este cálculo';
+            
+            // Retornar el contenedor en lugar del input
+            div.appendChild(label);
+            div.appendChild(container);
+            div.appendChild(helperText);
+            return div;
             
         default:
             input = document.createElement('input');
@@ -1114,6 +1162,11 @@ function generarTextoPlano(data) {
         texto = generarTextoLicenciasMultiples(data.licenciasData);
     }
     
+    // Agregar observaciones si existen
+    if (data.observaciones && data.observaciones.trim()) {
+        texto += '\n\nOBSERVACIONES ADICIONALES:\n' + data.observaciones.trim();
+    }
+    
     return texto;
 }
 
@@ -1181,9 +1234,17 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
         `para el día ${nombreDia} ${fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1)}` :
         `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
     
-    return `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N, ${fechasTexto}, debido a la realización de trámites personales.
-
-Sin otro particular, saludo a V.E. muy atentamente.-`;
+    let textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N, ${fechasTexto}, debido a la realización de trámites personales.`;
+    
+    // Solo agregar observaciones si están disponibles en el contexto global
+    const observaciones = document.getElementById('observaciones')?.value;
+    if (observaciones && observaciones.trim()) {
+        textoFinal += `\n\n${observaciones.trim()}`;
+    }
+    
+    textoFinal += `\n\nSin otro particular, saludo a V.E. muy atentamente.-`;
+    
+    return textoFinal;
 }
 
 function generarTextoCompensacion(compensaciones) {
@@ -1202,7 +1263,15 @@ function generarTextoCompensacion(compensaciones) {
         texto += `${index + 1}. ${diasTexto} correspondiente a ${comp.licencia_origen}, utilizado ${fechasTexto}.\n`;
     });
     
-    texto += '\nLa compensación se solicita conforme lo permite el artículo 14 de la Acordada 34/77 de la C.S.J.N.\n\nSin otro particular, saludo a V.E. muy atentamente.-';
+    texto += '\nLa compensación se solicita conforme lo permite el artículo 14 de la Acordada 34/77 de la C.S.J.N.';
+    
+    // Agregar observaciones si están disponibles
+    const observaciones = document.getElementById('observaciones')?.value;
+    if (observaciones && observaciones.trim()) {
+        texto += `\n\n${observaciones.trim()}`;
+    }
+    
+    texto += '\n\nSin otro particular, saludo a V.E. muy atentamente.-';
     
     return texto;
 }
@@ -1210,26 +1279,66 @@ function generarTextoCompensacion(compensaciones) {
 function generarTextoLicenciasMultiples(licenciasData) {
     let texto = 'Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme las siguientes licencias:\n\n';
     
+    let contador = 1; // Contador general para todas las licencias y compensaciones
+    
     licenciasData.forEach((licenciaData, index) => {
         const licencia = licenciaData.licencia;
-        const dias = licenciaData.cantidad_dias;
-        const fechaInicio = new Date(licenciaData.fecha_inicio);
-        const fechaFin = new Date(licenciaData.fecha_fin);
         
-        const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
-        const fechasTexto = dias === 1 ?
-            `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
-            `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
-        
-        texto += `${index + 1}. ${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
+        // Validar si es una compensación o licencia normal
+        if (licenciaData.tipo === 'compensacion' && licenciaData.compensaciones) {
+            // Para compensaciones, agregar cada compensación individual
+            licenciaData.compensaciones.forEach((comp, compIndex) => {
+                const dias = comp.cantidad_dias || 0;
+                const fechaInicio = new Date(comp.fecha_inicio);
+                const fechaFin = new Date(comp.fecha_fin);
+                
+                const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
+                const fechasTexto = dias === 1 ?
+                    `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
+                    `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                
+                texto += `${numeroOrdinalATexto(contador)}: ${diasTexto} por compensación (${comp.licencia_origen}), ${fechasTexto}.\n`;
+                contador++;
+            });
+        } else {
+            // Para licencias normales
+            const dias = licenciaData.cantidad_dias || 0;
+            const fechaInicio = licenciaData.fecha_inicio ? new Date(licenciaData.fecha_inicio) : null;
+            const fechaFin = licenciaData.fecha_fin ? new Date(licenciaData.fecha_fin) : null;
+            
+            if (!fechaInicio || !fechaFin || isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
+                texto += `${numeroOrdinalATexto(contador)}: Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
+            } else {
+                const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
+                const fechasTexto = dias === 1 ?
+                    `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
+                    `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+                
+                texto += `${numeroOrdinalATexto(contador)}: ${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
+            }
+            contador++;
+        }
     });
     
-    texto += '\nTodas las licencias se solicitan conforme a la normativa vigente de la C.S.J.N.\n\nSin otro particular, saludo a V.E. muy atentamente.-';
+    texto += '\nTodas las licencias se solicitan conforme a la normativa vigente de la C.S.J.N.';
+    
+    // Agregar observaciones si están disponibles
+    const observaciones = document.getElementById('observaciones')?.value;
+    if (observaciones && observaciones.trim()) {
+        texto += `\n\n${observaciones.trim()}`;
+    }
+    
+    texto += '\n\nSin otro particular, saludo a V.E. muy atentamente.-';
     
     return texto;
 }
 
 function numeroATexto(num) {
+    // Validar que num sea un número válido
+    if (num === undefined || num === null || isNaN(num)) {
+        return 'X'; // Fallback para valores inválidos
+    }
+    
     const numeros = {
         1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco',
         6: 'seis', 7: 'siete', 8: 'ocho', 9: 'nueve', 10: 'diez',
@@ -1238,6 +1347,23 @@ function numeroATexto(num) {
     };
     
     return numeros[num] || num.toString();
+}
+
+function numeroOrdinalATexto(num) {
+    // Validar que num sea un número válido
+    if (num === undefined || num === null || isNaN(num)) {
+        return 'X'; // Fallback para valores inválidos
+    }
+    
+    const ordinales = {
+        1: 'Primero', 2: 'Segundo', 3: 'Tercero', 4: 'Cuarto', 5: 'Quinto',
+        6: 'Sexto', 7: 'Séptimo', 8: 'Octavo', 9: 'Noveno', 10: 'Décimo',
+        11: 'Décimo primero', 12: 'Décimo segundo', 13: 'Décimo tercero', 
+        14: 'Décimo cuarto', 15: 'Décimo quinto', 16: 'Décimo sexto',
+        17: 'Décimo séptimo', 18: 'Décimo octavo', 19: 'Décimo noveno', 20: 'Vigésimo'
+    };
+    
+    return ordinales[num] || `${num}º`;
 }
 
 function configurarEventosCopia() {

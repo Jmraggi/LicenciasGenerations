@@ -510,7 +510,6 @@ function generarHTMLCompleto(data) {
 
     ${data.observaciones ? `
         <div class="observaciones">
-            <h2>Observaciones Adicionales</h2>
             <p>${data.observaciones}</p>
         </div>
     ` : ''}
@@ -797,9 +796,6 @@ function resetearFormulario() {
     // Limpiar campos dinámicos
     document.getElementById('camposDinamicos').innerHTML = '';
     document.getElementById('selectedLicenseInfo').innerHTML = '';
-    
-    // Actualizar contador
-    actualizarContadorSelecciones();
     
     // Deshabilitar botón siguiente
     document.getElementById('nextBtn').disabled = true;
