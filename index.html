@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Solicitudes de Licencias</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-file-alt"></i>
+                    <h1>Generador de Licencias</h1>
+                </div>
+                <div class="header-info">
+                    <span class="date-info">
+                        <i class="fas fa-calendar"></i>
+                        <span id="currentDate"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <div class="container">
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <span>Seleccionar Licencias</span>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <span>Completar Datos</span>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <span>Generar Solicitud</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Selección de Licencia -->
+            <section id="step1" class="step-content active">
+                <div class="section-header">
+                    <h2><i class="fas fa-list-ul"></i> Seleccionar Tipo de Licencia</h2>
+                    <p>Escolha el tipo de licencia que desea solicitar. Las licencias están organizadas por frecuencia de uso.</p>
+                </div>
+
+
+
+                <!-- Lista de Licencias -->
+                <div class="licencias-grid" id="licenciasGrid">
+                    <!-- Las licencias se cargarán dinámicamente aquí -->
+                </div>
+            </section>
+
+            <!-- Step 2: Formulario de Datos -->
+            <section id="step2" class="step-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-edit"></i> Completar Información de las Licencias</h2>
+                    <p>Configure los datos específicos para cada licencia seleccionada.</p>
+                </div>
+
+                <div class="form-container">
+                    <div class="selected-license-info" id="selectedLicenseInfo">
+                        <!-- Info de licencia seleccionada -->
+                    </div>
+
+                    <form id="solicitudForm" class="solicitud-form">
+                        <!-- Campos Dinámicos según la Licencia -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-calendar-alt"></i> Datos de la Licencia</h3>
+                            <div id="camposDinamicos">
+                                <!-- Los campos se generarán dinámicamente según la licencia -->
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-comment"></i> Observaciones Adicionales</h3>
+                            <div class="form-group">
+                                <label for="observaciones">Observaciones (Opcional)</label>
+                                <textarea id="observaciones" rows="4" placeholder="Agregue cualquier información adicional relevante..."></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Step 3: Generar Solicitud -->
+            <section id="step3" class="step-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-file-export"></i> Generar Solicitud</h2>
+                    <p>Su solicitud está lista. Puede copiarla como texto o descargar en PDF.</p>
+                </div>
+
+                <div class="generation-container">
+                    <div class="generation-options">
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-copy"></i>
+                            </div>
+                            <h3>Copiar Texto Plano</h3>
+                            <p>Copie la solicitud como texto para pegar en Word o Google Docs</p>
+                            <button type="button" class="btn-primary" id="copiarTextoBtn">
+                                <i class="fas fa-copy"></i> Copiar Texto
+                            </button>
+                        </div>
+
+                        <div class="option-card">
+                            <div class="option-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <h3>Descargar PDF</h3>
+                            <p>Genere un documento PDF profesional (próximamente)</p>
+                            <button type="button" class="btn-primary" id="descargarPdfBtn" disabled>
+                                <i class="fas fa-file-pdf"></i> Descargar PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Área de texto generado -->
+                    <div class="texto-generado-container" id="textoGeneradoContainer" style="display: none;">
+                        <h3>Texto de la Solicitud:</h3>
+                        <div class="texto-preview">
+                            <textarea id="textoGenerado" readonly rows="15"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navegación -->
+            <div class="navigation">
+                <button type="button" class="btn-secondary" id="prevBtn" onclick="anteriorPaso()" style="display: none;">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>
+                <button type="button" class="btn-primary" id="nextBtn" onclick="siguientePaso()">
+                    Siguiente <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Múltiples Solicitudes -->
+            <div class="multiple-requests" id="multipleRequests" style="display: none;">
+                <div class="requests-header">
+                    <h3><i class="fas fa-layer-group"></i> Solicitudes Múltiples</h3>
+                    <button type="button" class="btn-secondary" id="addRequestBtn">
+                        <i class="fas fa-plus"></i> Agregar Otra Solicitud
+                    </button>
+                </div>
+                <div class="requests-list" id="requestsList">
+                    <!-- Lista de solicitudes múltiples -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Sistema de Licencias</h4>
+                    <p>Generador automatizado de solicitudes de licencias laborales</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Información</h4>
+                    <ul>
+                        <li><a href="#" onclick="mostrarAyuda()">Ayuda</a></li>
+                        <li><a href="#" onclick="mostrarContacto()">Contacto</a></li>
+                        <li><a href="PROPUESTA_PROFESIONAL.md" target="_blank">Documentación</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Versión</h4>
+                    <p>v1.0.0 - Octubre 2025</p>
+                    <p>Desarrollado con HTML5, CSS3 y JavaScript</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Sistema de Generación de Licencias. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Modal de Ayuda -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ayuda - Cómo usar el sistema</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h4>Pasos para generar una solicitud:</h4>
+                    <ol>
+                        <li><strong>Seleccionar Licencia:</strong> Escolha el tipo de licencia de la lista organizada por prioridad</li>
+                        <li><strong>Completar Datos:</strong> Llene todos los campos requeridos</li>
+                        <li><strong>Vista Previa:</strong> Revise la información antes de generar</li>
+                        <li><strong>Generar:</strong> Copie el HTML o envíe por email</li>
+                    </ol>
+                    
+                    <h4>Funcionalidades:</h4>
+                    <ul>
+                        <li>Filtros por categoría y búsqueda de texto</li>
+                        <li>Validación automática de fechas y campos</li>
+                        <li>Generación de HTML formateado</li>
+                        <li>Múltiples solicitudes en una sesión</li>
+                        <li>Compatible con todos los navegadores modernos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Acción</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">¿Está seguro de que desea continuar?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="cerrarModal('confirmModal')">Cancelar</button>
+                <button type="button" class="btn-primary" id="confirmBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container">
+        <!-- Los toasts se generarán dinámicamente -->
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <p>Procesando...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/licencias-data.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/form-validator.js"></script>
+    <script src="js/html-generator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
