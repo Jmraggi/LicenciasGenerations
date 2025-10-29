@@ -1437,8 +1437,144 @@ function configurarEventosCopia() {
     
     if (descargarPdfBtn) {
         descargarPdfBtn.onclick = function() {
-            mostrarToast('Función de PDF en desarrollo. Próximamente disponible.', 'info');
+            generarPDF();
         };
+    }
+}
+
+// Función para generar y descargar PDF
+function generarPDF() {
+    try {
+        // Verificar que jsPDF esté disponible
+        if (typeof window.jspdf === 'undefined') {
+            mostrarToast('Error: Librería PDF no disponible', 'error');
+            return;
+        }
+        
+        // Obtener el texto de la solicitud
+        const textoSolicitud = document.getElementById('textoGenerado').value;
+        
+        if (!textoSolicitud || textoSolicitud.trim() === '') {
+            mostrarToast('No hay contenido para generar el PDF', 'warning');
+            return;
+        }
+        
+        // Crear nueva instancia de jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configurar fuente y tamaño
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        
+        // Configurar márgenes
+        const margenIzquierdo = 25;
+        const margenDerecho = 25;
+        const anchoUtil = 210 - margenIzquierdo - margenDerecho; // A4 width minus margins
+        const margenSuperior = 30;
+        let posicionY = margenSuperior;
+        
+        // Agregar encabezado - Poder Judicial de la Nación
+        doc.setFontSize(16);
+        doc.setFont('times', 'italic');
+        const textoPoder = 'Poder Judicial de la Nación';
+        const anchoPoder = doc.getTextWidth(textoPoder);
+        const centroX = (210 - anchoPoder) / 2; // Centrar en página A4
+        doc.text(textoPoder, centroX, posicionY);
+        posicionY += 35;
+        
+        // Agregar fecha y lugar - Mar del Plata, fecha
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const fechaActual = new Date().toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'long', 
+            year: 'numeric'
+        });
+        const textoFechaLugar = `Mar del Plata, ${fechaActual}.`;
+        doc.text(textoFechaLugar, margenIzquierdo, posicionY);
+        posicionY += 25;
+        
+        // Procesar el texto línea por línea con formato justificado
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        
+        const lineas = textoSolicitud.split('\n');
+        
+        lineas.forEach(linea => {
+            if (linea.trim() === '') {
+                posicionY += 8; // Espacio para líneas vacías
+            } else {
+                // Dividir líneas largas y justificar texto
+                const palabras = linea.split(' ');
+                let lineaActual = '';
+                
+                palabras.forEach(palabra => {
+                    const lineaTest = lineaActual + (lineaActual ? ' ' : '') + palabra;
+                    const anchoLinea = doc.getTextWidth(lineaTest);
+                    
+                    if (anchoLinea > anchoUtil && lineaActual) {
+                        // La línea es muy larga, imprimir la línea actual justificada
+                        doc.text(lineaActual, margenIzquierdo, posicionY, { 
+                            maxWidth: anchoUtil,
+                            align: 'justify'
+                        });
+                        posicionY += 8;
+                        lineaActual = palabra;
+                        
+                        // Verificar si necesitamos una nueva página
+                        if (posicionY > 260) { // Cerca del final de la página
+                            doc.addPage();
+                            posicionY = margenSuperior + 20; // Reiniciar sin encabezado en páginas siguientes
+                        }
+                    } else {
+                        lineaActual = lineaTest;
+                    }
+                });
+                
+                // Imprimir la última línea
+                if (lineaActual) {
+                    doc.text(lineaActual, margenIzquierdo, posicionY, { 
+                        maxWidth: anchoUtil,
+                        align: 'justify'
+                    });
+                    posicionY += 8;
+                    
+                    // Verificar si necesitamos una nueva página
+                    if (posicionY > 260) {
+                        doc.addPage();
+                        posicionY = margenSuperior + 20;
+                    }
+                }
+            }
+        });
+        
+        // Agregar espacio adicional para firma si hay suficiente espacio
+        if (posicionY < 220) {
+            posicionY += 25;
+            
+            // Línea para firma
+            const anchoLinea = 80;
+            const xFirma = margenIzquierdo;
+            doc.line(xFirma, posicionY, xFirma + anchoLinea, posicionY);
+            
+            // Texto "Firma y aclaración"
+            doc.setFontSize(10);
+            doc.text('Firma y aclaración', xFirma, posicionY + 10);
+        }
+        
+        // Generar nombre del archivo
+        const fechaArchivo = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const nombreArchivo = `Solicitud_Licencia_${fechaArchivo}.pdf`;
+        
+        // Descargar el PDF
+        doc.save(nombreArchivo);
+        
+        mostrarToast('PDF generado y descargado exitosamente', 'success');
+        
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        mostrarToast('Error al generar el PDF: ' + error.message, 'error');
     }
 }
 
