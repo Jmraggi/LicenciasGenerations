@@ -1,73 +1,58 @@
-# Sistema de Generación de Solicitudes de Licencias
+# 🏛️ Sistema de Generación de Solicitudes de Licencias
+### Poder Judicial de la Nación - Generador Automatizado de Licencias Laborales
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/usuario/LicenciasGenerations)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/es/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/es/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/es/docs/Web/JavaScript)
 
 ## 🚀 Descripción
 
-Sistema web completo para generar solicitudes de licencias laborales de forma automatizada. Desarrollado con **HTML5**, **CSS3** y **JavaScript puro** sin dependencias externas.
+Sistema web profesional para generar solicitudes de licencias laborales de forma automatizada siguiendo el formato oficial del Poder Judicial de la Nación. Desarrollado con **HTML5**, **CSS3** y **JavaScript ES6+** sin dependencias externas pesadas.
 
 ## ✨ Características Principales
 
-- **22 tipos de licencias** organizadas por prioridad de uso
-- **Interfaz intuitiva** con 4 pasos guiados
-- **Generación automática** de HTML formateado para emails
+### 🎯 **Funcionalidades Core**
+- **25+ tipos de licencias** organizadas por prioridad de uso
+- **Interfaz intuitiva** con 3 pasos guiados
+- **Generación automática** de texto y PDF con formato oficial
 - **Diseño responsive** compatible con móviles, tablets y escritorio
 - **Múltiples solicitudes** en una sesión
-- **Copia al portapapeles** con un click
-- **Vista previa** antes de generar
-- **Validación automática** de formularios y fechas
+- **Edición en tiempo real** del texto generado
+- **Validación inteligente** de fechas y formularios
 
-## 📋 Licencias Principales
+### 📄 **Generación de Documentos**
+- **Texto plano** para copiar en emails
+- **PDF profesional** con formato del Poder Judicial
+- **Artículos específicos** según cada licencia seleccionada
+- **Fechas automáticas** sin errores de zona horaria
+- **Formato oficial** con encabezado institucional
 
-El sistema muestra inicialmente las 4 licencias más solicitadas:
+### 🎨 **Interfaz de Usuario**
+- **Progress indicator** glassmorphism en header
+- **Campos compactos** con diseño grid responsive
+- **Botones +/- interactivos** para cantidad de días
+- **Badges informativos** mostrando licencias seleccionadas
+- **Animaciones suaves** y transiciones CSS
 
-1. **Art. 22** - Enfermedad - Afecciones Comunes (30 días)
-2. **Art. 34 Inc. C** - Razones Particulares (6 días)
-3. **Art. 14** - Compensación (Variable)
-4. **Art. 23** - Enfermedad - Afecciones de Largo Tratamiento (Variable)
+## 📋 Licencias Disponibles
 
-> **Botón "Ver Más"**: Acceso a las 18 licencias adicionales
+### **Licencias Principales** (mostradas inicialmente)
+1. **Art. 34 Inc. C** - Razones Particulares (6 días)
+2. **Art. 14** - Compensación (Variable)
+3. **Art. 22** - Enfermedad - Afecciones Comunes (30 días)
+4. **Art. 29** - Atención de Familiar Enfermo (Variable)
 
-## 🛠️ Instalación
+### **Licencias Adicionales** (botón "Ver Más")
+- Art. 15 - Matrimonio
+- Art. 16 - Examen
+- Art. 17 - Nacimiento de hijo
+- Art. 18 - Fallecimiento de familiar
+- Art. 23 - Enfermedad de largo tratamiento
+- Y 15+ licencias más...
 
-### Requisitos Previos
-- Servidor web local (XAMPP, WAMP, LAMP, etc.)
-- Navegador web moderno (Chrome, Firefox, Safari, Edge)
-
-### Pasos de Instalación
-
-1. **Clonar o descargar** el proyecto en la carpeta del servidor web:
-   ```bash
-   c:\xampp\htdocs\LicenciasGenerations\
-   ```
-
-2. **Iniciar el servidor web** (XAMPP, WAMP, etc.)
-
-3. **Abrir en el navegador**:
-   ```
-   http://localhost/LicenciasGenerations/
-   ```
-
-## 📱 Uso del Sistema
-
-### Paso 1: Seleccionar Licencia
-- Revisar las **4 licencias principales**
-- Usar **"Ver Más"** para acceder a todas las licencias
-- **Click en "Seleccionar"** en la licencia deseada
-
-### Paso 2: Completar Datos
-- **Datos del empleado**: Nombre, legajo, cargo, dependencia
-- **Datos de la licencia**: Fechas, motivos, certificados según corresponda
-- **Validación automática** de campos y fechas
-- **Cálculo automático** de días solicitados
-
-### Paso 3: Vista Previa
-- **Revisar** toda la información ingresada
-- **Verificar** fechas y períodos
-- **Editar** si es necesario antes de continuar
-
-### Paso 4: Generar Solicitud
-- **Copiar al portapapeles**: HTML formateado listo para email
-- **Abrir email**: Preparar mensaje automáticamente
-- **Solicitudes múltiples**: Agregar más licencias en la misma sesión
+> **💡 Tip**: El sistema muestra primero las licencias más utilizadas para optimizar la experiencia del usuario.
 
 ## 📁 Estructura del Proyecto
 
@@ -99,49 +84,6 @@ LicenciasGenerations/
 - **Accesibilidad**: Cumple estándares WCAG
 - **Performance**: Carga rápida (< 500KB total)
 
-## 🔧 Configuración Avanzada
-
-### Personalizar Licencias
-Editar el archivo `js/licencias-data.js`:
-
-```javascript
-{
-    id: 23,
-    codigo: "NUEVA_LICENCIA",
-    nombre: "Nueva Licencia Personalizada",
-    descripcion: "Descripción de la nueva licencia",
-    dias_maximos: 15,
-    requiere_certificado: true,
-    categoria: "Personal",
-    campos_requeridos: ["fecha_inicio", "fecha_fin", "motivo"]
-}
-```
-
-### Modificar Estilos
-El archivo `css/styles.css` utiliza variables CSS:
-
-```css
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    /* Personalizar colores aquí */
-}
-```
-
-## 🚀 Despliegue en Producción
-
-### Servidor Web
-1. Subir archivos al servidor
-2. Configurar dominio o subdominio
-3. Verificar permisos de lectura
-
-### Optimizaciones
-- **Minificar** CSS y JavaScript
-- **Comprimir** imágenes si las hay
-- **Configurar** cache del navegador
-- **HTTPS** recomendado
-
 ## 📊 Beneficios del Sistema
 
 ### Para Empleados
@@ -157,57 +99,82 @@ El archivo `css/styles.css` utiliza variables CSS:
 - 📈 **Trazabilidad**: Registro claro de fechas y períodos
 
 ### Para la Organización
-- 💰 **ROI positivo**: Recuperación de inversión en 2 meses
 - 🔄 **Escalabilidad**: Preparado para crecimiento
 - 🔧 **Mantenibilidad**: Código simple y bien documentado
 - 🔮 **Futuro**: Base para integraciones adicionales
 
-## 🛡️ Seguridad
+### **Paso a Paso Completo**
 
-- **Sin almacenamiento**: No guarda datos sensibles
-- **Validación cliente**: JavaScript valida antes de procesar
-- **Código limpio**: Sin dependencias que comprometan seguridad
-- **Portable**: Funciona sin conexión a internet
+#### **🎯 Paso 1: Seleccionar Licencias**
+1. Al abrir el sistema, verás **4 licencias principales** organizadas por prioridad
+2. **Click en "Seleccionar"** para elegir una o más licencias
+3. El sistema muestra un **badge** con las licencias seleccionadas
+4. Usa **"Ver Más"** para acceder a las 20+ licencias adicionales
+5. **"Limpiar"** para reiniciar selecciones si es necesario
+6. Click **"Siguiente"** cuando hayas seleccionado todas las licencias
 
-## 🐛 Solución de Problemas
+#### **🎯 Paso 2: Completar Datos**
+1. **Formularios dinámicos** se generan según las licencias seleccionadas
+2. **Campos obligatorios** están marcados con asterisco (*)
+3. **Fechas**: El sistema calcula automáticamente los días
+4. **Botones +/-**: Para ajustar cantidad de días manualmente
+5. **Compensaciones**: Formulario especial con múltiples períodos
+6. **Validación en tiempo real**: Errores se muestran inmediatamente
+7. **Observaciones**: Campo opcional para información adicional
 
-### Problemas Comunes
+#### **🎯 Paso 3: Generar y Descargar**
+1. **Revisión automática** del texto generado
+2. **Edición libre**: Modificar el texto antes de finalizar
+3. **Copiar texto**: Para pegar en Zimbra y enviar por email
+4. **Descargar PDF**: Documento oficial con formato del Poder Judicial
+5. **Nueva solicitud**: Opción para generar otra solicitud
 
-**Error: "No se puede copiar al portapapeles"**
-- Verificar que el sitio use HTTPS
-- Probar con navegador moderno
-- Usar botón "Copiar código HTML"
+## �🛡️ Seguridad y Privacidad
 
-**Las fechas no se validan correctamente**
-- Verificar formato de fecha (YYYY-MM-DD)
-- Asegurar que JavaScript esté habilitado
+### **Medidas Implementadas**
+- ✅ **Sin almacenamiento local**: No guarda datos sensibles
+- ✅ **Validación cliente**: JavaScript previene inputs maliciosos  
+- ✅ **Sin cookies**: Respeta la privacidad del usuario
+- ✅ **HTTPS compatible**: Funciona con conexiones seguras
+- ✅ **CSP ready**: Compatible con Content Security Policy
 
-**Las tarjetas no se cargan**
-- Verificar que todos los archivos JS estén presentes
-- Revisar consola del navegador para errores
+## 🔮 Roadmap Futuro
 
-### Contacto Técnico
-Para soporte técnico o personalizaciones, contactar al administrador del sistema.
+### **Versión 1.1** (Próximamente)
+- [ ] **Backend integration**: API REST opcional
+- [ ] **User authentication**: Login con roles
+- [ ] **Workflow management**: Aprobación de solicitudes
+- [ ] **Email templates**: Envío automático
+- [ ] **Mobile app**: PWA con offline support
 
-## 📈 Futuras Mejoras
-
-### Versión 1.1 (Planificada)
-- [ ] Integración directa con email
-- [ ] Exportación a PDF
-- [ ] Guardado de borradores
-- [ ] Notificaciones automáticas
-
-### Versión 1.2 (Futura)
-- [ ] Integración con base de datos
-- [ ] API REST para sistemas externos
-- [ ] Dashboard de estadísticas
-- [ ] Flujo de aprobaciones
+### **Versión 1.2** (Mediano Plazo)
+- [ ] **Analytics dashboard**: Métricas de uso
+- [ ] **Multi-tenancy**: Soporte multi-organización
+- [ ] **Advanced PDF**: Templates personalizables
+- [ ] **Integration APIs**: RRHH systems
+- [ ] **Audit trails**: Historial completo
 
 ## 📄 Licencia
 
-Este proyecto fue desarrollado como sistema interno. Todos los derechos reservados.
+```
+MIT License
 
----
+Copyright (c) 2025 Sistema de Licencias
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+```
 
 **Desarrollado con ❤️ para optimizar procesos administrativos**
 
