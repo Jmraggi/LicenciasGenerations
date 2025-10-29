@@ -209,6 +209,9 @@ function limpiarSelecciones() {
 function prepararFormulario() {
     const infoContainer = document.getElementById('selectedLicenseInfo');
     
+    // Actualizar el texto de las licencias seleccionadas
+    actualizarTextoLicenciasSeleccionadas();
+    
     if (selectedLicenses.length === 1) {
         // Una sola licencia
         const licencia = selectedLicenses[0];
@@ -225,6 +228,42 @@ function prepararFormulario() {
         infoContainer.innerHTML = '';
         generarFormularioMultipleLicencias();
     }
+}
+
+function actualizarTextoLicenciasSeleccionadas() {
+    const textoElement = document.getElementById('licenciasSeleccionadasTexto');
+    
+    if (!textoElement) return;
+    
+    if (selectedLicenses.length === 0) {
+        textoElement.textContent = '';
+        return;
+    }
+    
+    let texto = '';
+    
+    if (selectedLicenses.length === 1) {
+        // Una sola licencia
+        texto = `(${selectedLicenses[0].nombre})`;
+    } else {
+        // Múltiples licencias
+        const nombres = selectedLicenses.map(lic => {
+            // Acortar nombres muy largos
+            let nombre = lic.nombre;
+            if (nombre.length > 30) {
+                nombre = nombre.substring(0, 27) + '...';
+            }
+            return nombre;
+        });
+        
+        if (nombres.length <= 2) {
+            texto = `(${nombres.join(' y ')})`;
+        } else {
+            texto = `(${nombres.slice(0, 2).join(', ')} y ${nombres.length - 2} más)`;
+        }
+    }
+    
+    textoElement.textContent = texto;
 }
 
 function generarFormularioCompensacionUnica() {
@@ -1181,8 +1220,8 @@ function generarTextoLicenciaUnica(licenciaData) {
 }
 
 function generarTextoLicenciaNormal(licencia, licenciaData) {
-    const fechaInicio = new Date(licenciaData.fecha_inicio);
-    const fechaFin = new Date(licenciaData.fecha_fin);
+    const fechaInicio = crearFechaLocal(licenciaData.fecha_inicio);
+    const fechaFin = crearFechaLocal(licenciaData.fecha_fin);
     const dias = licenciaData.cantidad_dias;
     
     const nombreDia = fechaInicio.toLocaleDateString('es-ES', { weekday: 'long' });
@@ -1197,7 +1236,7 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
     
     switch (licencia.codigo) {
         case 'ART_34_INC_C':
-            articulo = 'artículo 35 inc. "c" de la Acordada 34/77';
+            articulo = 'artículo 34 inc. "c" de la Acordada 34/77';
             motivo = 'motivos particulares';
             break;
         case 'ART_22':
@@ -1224,9 +1263,15 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
             articulo = 'artículo 18 de la Acordada 34/77';
             motivo = 'fallecimiento de familiar';
             break;
+        case 'ART_29':
+            articulo = 'artículo 29 de la Acordada 34/77';
+            motivo = 'atención de familiar enfermo';
+            break;
         default:
-            articulo = 'normativa correspondiente';
-            motivo = 'el motivo solicitado';
+            // Para licencias no especificadas, usar el artículo basado en el código
+            const numeroArticulo = obtenerArticuloLicencia(licencia.codigo);
+            articulo = `artículo ${numeroArticulo} de la Acordada 34/77`;
+            motivo = licencia.nombre.toLowerCase();
     }
     
     const diasTexto = dias === 1 ? `un (1) día` : `${dias} (${numeroATexto(dias)}) días`;
@@ -1234,7 +1279,7 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
         `para el día ${nombreDia} ${fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1)}` :
         `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
     
-    let textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N, ${fechasTexto}, debido a la realización de trámites personales.`;
+    let textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido a la realización de trámites personales.`;
     
     // Solo agregar observaciones si están disponibles en el contexto global
     const observaciones = document.getElementById('observaciones')?.value;
@@ -1251,8 +1296,8 @@ function generarTextoCompensacion(compensaciones) {
     let texto = 'Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme compensación por los siguientes días de licencia utilizados:\n\n';
     
     compensaciones.forEach((comp, index) => {
-        const fechaInicio = new Date(comp.fecha_inicio);
-        const fechaFin = new Date(comp.fecha_fin);
+        const fechaInicio = crearFechaLocal(comp.fecha_inicio);
+        const fechaFin = crearFechaLocal(comp.fecha_fin);
         const dias = comp.cantidad_dias;
         
         const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
@@ -1289,8 +1334,8 @@ function generarTextoLicenciasMultiples(licenciasData) {
             // Para compensaciones, agregar cada compensación individual
             licenciaData.compensaciones.forEach((comp, compIndex) => {
                 const dias = comp.cantidad_dias || 0;
-                const fechaInicio = new Date(comp.fecha_inicio);
-                const fechaFin = new Date(comp.fecha_fin);
+                const fechaInicio = crearFechaLocal(comp.fecha_inicio);
+                const fechaFin = crearFechaLocal(comp.fecha_fin);
                 
                 const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
                 const fechasTexto = dias === 1 ?
@@ -1303,8 +1348,8 @@ function generarTextoLicenciasMultiples(licenciasData) {
         } else {
             // Para licencias normales
             const dias = licenciaData.cantidad_dias || 0;
-            const fechaInicio = licenciaData.fecha_inicio ? new Date(licenciaData.fecha_inicio) : null;
-            const fechaFin = licenciaData.fecha_fin ? new Date(licenciaData.fecha_fin) : null;
+            const fechaInicio = licenciaData.fecha_inicio ? crearFechaLocal(licenciaData.fecha_inicio) : null;
+            const fechaFin = licenciaData.fecha_fin ? crearFechaLocal(licenciaData.fecha_fin) : null;
             
             if (!fechaInicio || !fechaFin || isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
                 texto += `${numeroOrdinalATexto(contador)}: Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
@@ -1320,7 +1365,7 @@ function generarTextoLicenciasMultiples(licenciasData) {
         }
     });
     
-    texto += '\nTodas las licencias se solicitan conforme a la normativa vigente de la C.S.J.N.';
+    texto += `\nTodas las licencias se solicitan conforme a ${generarTextoArticulos(licenciasData)}`;
     
     // Agregar observaciones si están disponibles
     const observaciones = document.getElementById('observaciones')?.value;
@@ -1535,4 +1580,81 @@ function validarCompensaciones(licenciaIndex) {
     });
     
     return compensaciones;
+}
+
+// Función helper para crear fechas locales evitando problemas de zona horaria
+function crearFechaLocal(fechaString) {
+    if (!fechaString) return null;
+    
+    // Si ya es un objeto Date, devolverlo
+    if (fechaString instanceof Date) return fechaString;
+    
+    // Separar año, mes y día del string YYYY-MM-DD
+    const partes = fechaString.split('-');
+    if (partes.length !== 3) return new Date(fechaString);
+    
+    const año = parseInt(partes[0]);
+    const mes = parseInt(partes[1]) - 1; // Los meses en JavaScript van de 0-11
+    const dia = parseInt(partes[2]);
+    
+    // Crear fecha local sin problemas de zona horaria
+    return new Date(año, mes, dia);
+}
+
+// Función para obtener el artículo correspondiente a cada código de licencia
+function obtenerArticuloLicencia(codigoLicencia) {
+    const articulos = {
+        'ART_34_INC_C': '34 inc. c',
+        'ART_14': '14',
+        'ART_22': '22',
+        'ART_29': '29',
+        'ART_23': '23',
+        'ART_15': '15',
+        'ART_16': '16',
+        'ART_17': '17',
+        'ART_18': '18',
+        'ART_19': '19',
+        'ART_20': '20',
+        'ART_21': '21',
+        'ART_24': '24',
+        'ART_25': '25',
+        'ART_26': '26',
+        'ART_27': '27',
+        'ART_28': '28',
+        'ART_30': '30',
+        'ART_31': '31',
+        'ART_32': '32',
+        'ART_33': '33',
+        'ART_34_INC_A': '34 inc. a',
+        'ART_34_INC_B': '34 inc. b',
+        'ART_35': '35'
+    };
+    
+    return articulos[codigoLicencia] || codigoLicencia;
+}
+
+// Función para generar texto de artículos basado en las licencias seleccionadas
+function generarTextoArticulos(licenciasData) {
+    // Extraer códigos únicos de licencias
+    const codigosUnicos = new Set();
+    
+    licenciasData.forEach(licenciaData => {
+        if (licenciaData.licencia && licenciaData.licencia.codigo) {
+            codigosUnicos.add(licenciaData.licencia.codigo);
+        }
+    });
+    
+    // Convertir a array y mapear a artículos
+    const articulos = Array.from(codigosUnicos).map(codigo => obtenerArticuloLicencia(codigo));
+    
+    if (articulos.length === 0) {
+        return 'la normativa vigente de la C.S.J.N.';
+    } else if (articulos.length === 1) {
+        return `el artículo ${articulos[0]} de la Acordada 34/77 de la C.S.J.N.`;
+    } else if (articulos.length === 2) {
+        return `los artículos ${articulos[0]} y ${articulos[1]} de la Acordada 34/77 de la C.S.J.N.`;
+    } else {
+        const ultimoArticulo = articulos.pop();
+        return `los artículos ${articulos.join(', ')} y ${ultimoArticulo} de la Acordada 34/77 de la C.S.J.N.`;
+    }
 }

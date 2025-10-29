@@ -125,6 +125,12 @@ body {
     color: var(--light-color);
 }
 
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
 .logo h1 {
     font-size: var(--font-size-xl);
     font-weight: 700;
@@ -980,6 +986,24 @@ body {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-sm);
     border-bottom: 2px solid var(--light-color);
+    flex-wrap: wrap;
+}
+
+.licencias-seleccionadas-badge {
+    background: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-left: var(--spacing-sm);
+    white-space: nowrap;
+    animation: fadeIn 0.3s ease;
+}
+
+.licencias-seleccionadas-badge:empty {
+    display: none;
 }
 
 .form-row {
@@ -1812,6 +1836,18 @@ body {
     
     .form-row {
         grid-template-columns: 1fr;
+    }
+    
+    .form-section h3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+    
+    .licencias-seleccionadas-badge {
+        margin-left: 0;
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs) var(--spacing-sm);
     }
     
     .texto-header {
