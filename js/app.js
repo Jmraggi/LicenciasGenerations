@@ -1458,12 +1458,6 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
     
     let textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido a la realización de trámites personales.`;
     
-    // Solo agregar observaciones si están disponibles en el contexto global
-    const observaciones = document.getElementById('observaciones')?.value;
-    if (observaciones && observaciones.trim()) {
-        textoFinal += `\n\n${observaciones.trim()}`;
-    }
-    
     textoFinal += `\n\nSin otro particular, saludo a V.E. muy atentamente.-`;
     
     return textoFinal;
@@ -1486,12 +1480,6 @@ function generarTextoCompensacion(compensaciones) {
     });
     
     texto += '\nLa compensación se solicita conforme lo permite el artículo 14 de la Acordada 34/77 de la C.S.J.N.';
-    
-    // Agregar observaciones si están disponibles
-    const observaciones = document.getElementById('observaciones')?.value;
-    if (observaciones && observaciones.trim()) {
-        texto += `\n\n${observaciones.trim()}`;
-    }
     
     texto += '\n\nSin otro particular, saludo a V.E. muy atentamente.-';
     
@@ -1539,12 +1527,6 @@ function generarTextoLicenciasMultiples(licenciasData) {
     });
     
     texto += `\nTodas las licencias se solicitan conforme a ${generarTextoArticulos(licenciasData)}`;
-    
-    // Agregar observaciones si están disponibles
-    const observaciones = document.getElementById('observaciones')?.value;
-    if (observaciones && observaciones.trim()) {
-        texto += `\n\n${observaciones.trim()}`;
-    }
     
     texto += '\n\nSin otro particular, saludo a V.E. muy atentamente.-';
     
