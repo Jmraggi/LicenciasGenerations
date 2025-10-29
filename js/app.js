@@ -641,12 +641,27 @@ function agregarCompensacion(licenciaIndex) {
         <div class="compensacion-campos">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="licencia_origen_${licenciaIndex}_${compensacionIndex}">Licencia que corresponde *</label>
-                    <input type="text" id="licencia_origen_${licenciaIndex}_${compensacionIndex}" name="licencia_origen_${licenciaIndex}_${compensacionIndex}" required placeholder="ENERO 2025">
+                    <label>Período *</label>
+                    <div class="periodo-buttons-simple">
+                        <button type="button" class="periodo-btn-simple" id="btn_enero_${licenciaIndex}_${compensacionIndex}" onclick="seleccionarPeriodo(${licenciaIndex}, ${compensacionIndex}, 'ENERO')">
+                            <i class="fas fa-check" style="display: none;"></i>
+                            Enero
+                        </button>
+                        <button type="button" class="periodo-btn-simple" id="btn_julio_${licenciaIndex}_${compensacionIndex}" onclick="seleccionarPeriodo(${licenciaIndex}, ${compensacionIndex}, 'JULIO')">
+                            <i class="fas fa-check" style="display: none;"></i>
+                            Julio
+                        </button>
+                    </div>
                     <small class="help-text">
                         <i class="fas fa-info-circle"></i> 
-                        Especifique el MES y el AÑO que corresponde
+                        Seleccione el MES que corresponde a la licencia
                     </small>
+                </div>
+                <div class="form-group">
+                    <label for="ano_${licenciaIndex}_${compensacionIndex}">Año *</label>
+                    <select id="ano_${licenciaIndex}_${compensacionIndex}" name="ano_${licenciaIndex}_${compensacionIndex}" required onchange="actualizarLicenciaOrigenCombinada(${licenciaIndex}, ${compensacionIndex})">
+                        <option value="">Año</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="fecha_inicio_${licenciaIndex}_${compensacionIndex}">Fecha de Inicio *</label>
@@ -678,6 +693,12 @@ function agregarCompensacion(licenciaIndex) {
     
     container.appendChild(compensacionDiv);
     
+    // Poblar el select de años
+    poblarSelectAnos(licenciaIndex, compensacionIndex);
+    
+    // Configurar validación en tiempo real
+    configurarValidacionEnTiempoReal(licenciaIndex, compensacionIndex);
+    
     // Configurar cálculo automático para esta compensación
     configurarCalculoCompensacion(licenciaIndex, compensacionIndex);
     
@@ -705,6 +726,162 @@ function renumerarCompensaciones(licenciaIndex) {
             numeroSpan.textContent = `Compensación ${index + 1}`;
         }
     });
+}
+
+function poblarSelectAnos(licenciaIndex, compensacionIndex) {
+    const selectAno = document.getElementById(`ano_${licenciaIndex}_${compensacionIndex}`);
+    const anoActual = new Date().getFullYear();
+    
+    // Limpiar opciones existentes excepto la primera
+    selectAno.innerHTML = '<option value="">Seleccionar</option>';
+    
+    // Agregar años desde el actual hasta 6 años atrás
+    for (let i = 0; i <= 6; i++) {
+        const ano = anoActual - i;
+        const option = document.createElement('option');
+        option.value = ano;
+        option.textContent = ano;
+        selectAno.appendChild(option);
+    }
+}
+
+function seleccionarPeriodo(licenciaIndex, compensacionIndex, periodo) {
+    const btnEnero = document.getElementById(`btn_enero_${licenciaIndex}_${compensacionIndex}`);
+    const btnJulio = document.getElementById(`btn_julio_${licenciaIndex}_${compensacionIndex}`);
+    
+    // Remover selección de ambos botones
+    btnEnero.classList.remove('selected');
+    btnJulio.classList.remove('selected');
+    btnEnero.querySelector('.fas').style.display = 'none';
+    btnJulio.querySelector('.fas').style.display = 'none';
+    
+    // Seleccionar el botón clickeado
+    if (periodo === 'ENERO') {
+        btnEnero.classList.add('selected');
+        btnEnero.querySelector('.fas').style.display = 'inline';
+    } else if (periodo === 'JULIO') {
+        btnJulio.classList.add('selected');
+        btnJulio.querySelector('.fas').style.display = 'inline';
+    }
+    
+    // Actualizar el valor combinado
+    actualizarLicenciaOrigenCombinada(licenciaIndex, compensacionIndex);
+    
+    // Validar periodo en tiempo real
+    validarPeriodoEnTiempoReal(licenciaIndex, compensacionIndex);
+}
+
+function validarPeriodoEnTiempoReal(licenciaIndex, compensacionIndex) {
+    const btnEnero = document.getElementById(`btn_enero_${licenciaIndex}_${compensacionIndex}`);
+    const btnJulio = document.getElementById(`btn_julio_${licenciaIndex}_${compensacionIndex}`);
+    const selectAno = document.getElementById(`ano_${licenciaIndex}_${compensacionIndex}`);
+    
+    const tieneEnero = btnEnero && btnEnero.classList.contains('selected');
+    const tieneJulio = btnJulio && btnJulio.classList.contains('selected');
+    const tieneAno = selectAno && selectAno.value;
+    
+    const periodoValido = tieneEnero || tieneJulio;
+    
+    // Remover clases anteriores
+    [btnEnero, btnJulio, selectAno].forEach(elem => {
+        if (elem) {
+            elem.classList.remove('error', 'valid');
+        }
+    });
+    
+    // Aplicar clases válidas
+    if (periodoValido) {
+        if (btnEnero) btnEnero.classList.add('valid');
+        if (btnJulio) btnJulio.classList.add('valid');
+    }
+    
+    if (tieneAno) {
+        selectAno.classList.add('valid');
+    }
+}
+
+function actualizarLicenciaOrigenCombinada(licenciaIndex, compensacionIndex) {
+    const btnEnero = document.getElementById(`btn_enero_${licenciaIndex}_${compensacionIndex}`);
+    const btnJulio = document.getElementById(`btn_julio_${licenciaIndex}_${compensacionIndex}`);
+    const selectAno = document.getElementById(`ano_${licenciaIndex}_${compensacionIndex}`);
+    
+    let periodo = '';
+    if (btnEnero && btnEnero.classList.contains('selected')) {
+        periodo = 'ENERO';
+    } else if (btnJulio && btnJulio.classList.contains('selected')) {
+        periodo = 'JULIO';
+    }
+    
+    const ano = selectAno ? selectAno.value : '';
+    
+    // Crear un campo oculto para almacenar el valor combinado
+    const hiddenInput = document.getElementById(`licencia_origen_hidden_${licenciaIndex}_${compensacionIndex}`) || 
+                       (() => {
+                           const input = document.createElement('input');
+                           input.type = 'hidden';
+                           input.id = `licencia_origen_hidden_${licenciaIndex}_${compensacionIndex}`;
+                           input.name = `licencia_origen_${licenciaIndex}_${compensacionIndex}`;
+                           document.getElementById(`compensacion-${licenciaIndex}-${compensacionIndex}`).appendChild(input);
+                           return input;
+                       })();
+    
+    if (periodo && ano) {
+        hiddenInput.value = `${periodo} ${ano}`;
+    } else {
+        hiddenInput.value = '';
+    }
+    
+    // Validar después de actualizar
+    validarPeriodoEnTiempoReal(licenciaIndex, compensacionIndex);
+}
+
+function configurarValidacionEnTiempoReal(licenciaIndex, compensacionIndex) {
+    const btnEnero = document.getElementById(`btn_enero_${licenciaIndex}_${compensacionIndex}`);
+    const btnJulio = document.getElementById(`btn_julio_${licenciaIndex}_${compensacionIndex}`);
+    const selectAno = document.getElementById(`ano_${licenciaIndex}_${compensacionIndex}`);
+    const fechaInicio = document.getElementById(`fecha_inicio_${licenciaIndex}_${compensacionIndex}`);
+    const fechaFin = document.getElementById(`fecha_fin_${licenciaIndex}_${compensacionIndex}`);
+
+    function validarCampo(elemento, esValido) {
+        if (elemento) {
+            elemento.classList.remove('error', 'valid');
+            if (esValido) {
+                elemento.classList.add('valid');
+            }
+        }
+    }
+
+    function validarPeriodoYAno() {
+        const tieneEnero = btnEnero && btnEnero.classList.contains('selected');
+        const tieneJulio = btnJulio && btnJulio.classList.contains('selected');
+        const tieneAno = selectAno && selectAno.value;
+        
+        const periodoValido = tieneEnero || tieneJulio;
+        
+        validarCampo(btnEnero, periodoValido);
+        validarCampo(btnJulio, periodoValido);
+        validarCampo(selectAno, tieneAno);
+    }
+
+    // Configurar listeners para año
+    if (selectAno) {
+        selectAno.addEventListener('change', function() {
+            validarPeriodoYAno();
+        });
+    }
+
+    // Configurar listeners para fechas
+    if (fechaInicio) {
+        fechaInicio.addEventListener('change', function() {
+            validarCampo(fechaInicio, this.value);
+        });
+    }
+
+    if (fechaFin) {
+        fechaFin.addEventListener('change', function() {
+            validarCampo(fechaFin, this.value);
+        });
+    }
 }
 
 function configurarCalculoCompensacion(licenciaIndex, compensacionIndex) {
@@ -1305,7 +1482,7 @@ function generarTextoCompensacion(compensaciones) {
             `el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
             `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         
-        texto += `${index + 1}. ${diasTexto} correspondiente a ${comp.licencia_origen}, utilizado ${fechasTexto}.\n`;
+        texto += `${diasTexto} correspondiente a ${comp.licencia_origen}, utilizado ${fechasTexto}.\n`;
     });
     
     texto += '\nLa compensación se solicita conforme lo permite el artículo 14 de la Acordada 34/77 de la C.S.J.N.';
@@ -1324,8 +1501,6 @@ function generarTextoCompensacion(compensaciones) {
 function generarTextoLicenciasMultiples(licenciasData) {
     let texto = 'Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme las siguientes licencias:\n\n';
     
-    let contador = 1; // Contador general para todas las licencias y compensaciones
-    
     licenciasData.forEach((licenciaData, index) => {
         const licencia = licenciaData.licencia;
         
@@ -1342,8 +1517,7 @@ function generarTextoLicenciasMultiples(licenciasData) {
                     `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
                     `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
                 
-                texto += `${numeroOrdinalATexto(contador)}: ${diasTexto} por compensación (${comp.licencia_origen}), ${fechasTexto}.\n`;
-                contador++;
+                texto += `${diasTexto} por compensación (${comp.licencia_origen}), ${fechasTexto}.\n`;
             });
         } else {
             // Para licencias normales
@@ -1352,16 +1526,15 @@ function generarTextoLicenciasMultiples(licenciasData) {
             const fechaFin = licenciaData.fecha_fin ? crearFechaLocal(licenciaData.fecha_fin) : null;
             
             if (!fechaInicio || !fechaFin || isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-                texto += `${numeroOrdinalATexto(contador)}: Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
+                texto += `Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
             } else {
                 const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
                 const fechasTexto = dias === 1 ?
                     `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
                     `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
                 
-                texto += `${numeroOrdinalATexto(contador)}: ${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
+                texto += `${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
             }
-            contador++;
         }
     });
     
@@ -1682,8 +1855,38 @@ function validarCompensaciones(licenciaIndex) {
         
         let esValida = true;
         
+        // Validar campos de período y año
+        const btnEnero = item.querySelector(`[id*="btn_enero_${licenciaIndex}_"]`);
+        const btnJulio = item.querySelector(`[id*="btn_julio_${licenciaIndex}_"]`);
+        const selectAno = item.querySelector(`select[name^="ano_${licenciaIndex}_"]`);
+        
+        // Verificar que al menos un período esté seleccionado
+        const tieneEnero = btnEnero && btnEnero.classList.contains('selected');
+        const tieneJulio = btnJulio && btnJulio.classList.contains('selected');
+        
+        if (!tieneEnero && !tieneJulio) {
+            if (btnEnero) btnEnero.classList.add('error');
+            if (btnJulio) btnJulio.classList.add('error');
+            esValida = false;
+        } else {
+            if (btnEnero) btnEnero.classList.remove('error');
+            if (btnJulio) btnJulio.classList.remove('error');
+        }
+        
+        // Verificar que el año esté seleccionado
+        if (!selectAno || !selectAno.value) {
+            if (selectAno) selectAno.classList.add('error');
+            esValida = false;
+        } else {
+            if (selectAno) selectAno.classList.remove('error');
+        }
+        
+        // La validación del campo oculto
         if (!licenciaOrigen || !licenciaOrigen.value || licenciaOrigen.value.trim().length < 3) {
-            if (licenciaOrigen) licenciaOrigen.classList.add('error');
+            // Si falla, marcar los campos visibles como error
+            if (btnEnero) btnEnero.classList.add('error');
+            if (btnJulio) btnJulio.classList.add('error');
+            if (selectAno) selectAno.classList.add('error');
             esValida = false;
         }
         
