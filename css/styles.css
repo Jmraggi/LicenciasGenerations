@@ -1657,6 +1657,59 @@ body {
     line-height: 1.6;
 }
 
+.help-content h4 {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-md);
+    border-bottom: 2px solid var(--light-color);
+    padding-bottom: var(--spacing-xs);
+}
+
+.help-tips {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.help-tips h4 {
+    color: var(--secondary-color);
+    margin-top: 0;
+    border-bottom: none;
+}
+
+.help-content strong {
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Mejorar scrolling del modal */
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: var(--spacing-lg);
+}
+
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: var(--light-color);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
 /* Toast notifications */
 .toast-container {
     position: fixed;
