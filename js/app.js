@@ -228,6 +228,29 @@ function prepararFormulario() {
         infoContainer.innerHTML = '';
         generarFormularioMultipleLicencias();
     }
+    
+    // Actualizar el campo de observaciones según el tipo de licencia
+    actualizarCampoObservaciones();
+}
+
+function actualizarCampoObservaciones() {
+    const labelObservaciones = document.querySelector('label[for="observaciones"]');
+    const textareaObservaciones = document.getElementById('observaciones');
+    
+    if (!labelObservaciones || !textareaObservaciones) return;
+    
+    // Verificar si alguna licencia seleccionada es Art. 34 inc. C (Motivos Particulares)
+    const tieneMotivosParticulares = selectedLicenses.some(licencia => 
+        licencia.codigo === 'ART_34_INC_C'
+    );
+    
+    if (tieneMotivosParticulares) {
+        labelObservaciones.textContent = 'Motivos (Opcional)';
+        textareaObservaciones.placeholder = 'Detalle los motivos particulares...';
+    } else {
+        labelObservaciones.textContent = 'Observaciones (Opcional)';
+        textareaObservaciones.placeholder = 'Agregue cualquier información adicional relevante...';
+    }
 }
 
 function actualizarTextoLicenciasSeleccionadas() {
@@ -1378,9 +1401,15 @@ function generarTextoPlano(data) {
         texto = generarTextoLicenciasMultiples(data.licenciasData);
     }
     
-    // Agregar observaciones si existen
+    // Agregar observaciones/motivos si existen
     if (data.observaciones && data.observaciones.trim()) {
-        texto += '\n\nOBSERVACIONES ADICIONALES:\n' + data.observaciones.trim();
+        // Verificar si alguna licencia es Art. 34 inc. C
+        const tieneMotivosParticulares = data.licencias.some(licencia => 
+            licencia.codigo === 'ART_34_INC_C'
+        );
+        
+        const titulo = tieneMotivosParticulares ? 'MOTIVOS:' : 'OBSERVACIONES ADICIONALES:';
+        texto += '\n\n' + titulo + '\n' + data.observaciones.trim();
     }
     
     return texto;
@@ -1451,12 +1480,26 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
             motivo = licencia.nombre.toLowerCase();
     }
     
-    const diasTexto = dias === 1 ? `un (1) día` : `${dias} (${numeroATexto(dias)}) días`;
+    const diasTexto = dias === 1 ? `1 (un) día` : `${dias} (${numeroATexto(dias)}) días`;
     const fechasTexto = dias === 1 ? 
         `para el día ${nombreDia} ${fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1)}` :
         `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
     
-    let textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido a la realización de trámites personales.`;
+    let textoFinal;
+    
+    // Formato especial para Art. 22 (Enfermedad) y Art. 29 (Familiar Enfermo)
+    if (licencia.codigo === 'ART_22' || licencia.codigo === 'ART_29') {
+        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+    } else if (licencia.codigo === 'ART_20') {
+        // Art. 20 Maternidad - sin "trámites personales"
+        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+    } else if (licencia.codigo === 'ART_34_INC_C') {
+        // Art. 33/34 Motivos Particulares - cambiar observaciones por motivos
+        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+    } else {
+        // Formato estándar para otras licencias
+        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido a la realización de trámites personales.`;
+    }
     
     textoFinal += `\n\nSin otro particular, saludo a V.E. muy atentamente.-`;
     
@@ -1471,12 +1514,12 @@ function generarTextoCompensacion(compensaciones) {
         const fechaFin = crearFechaLocal(comp.fecha_fin);
         const dias = comp.cantidad_dias;
         
-        const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
+        const diasTexto = dias === 1 ? '1 (un) día' : `${dias} (${numeroATexto(dias)}) días`;
         const fechasTexto = dias === 1 ?
             `el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
             `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         
-        texto += `${diasTexto} correspondiente a ${comp.licencia_origen}, utilizado ${fechasTexto}.\n`;
+        texto += `• ${diasTexto} correspondiente a los días trabajados en ${comp.licencia_origen}, utilizado ${fechasTexto}.\n`;
     });
     
     texto += '\nLa compensación se solicita conforme lo permite el artículo 14 de la Acordada 34/77 de la C.S.J.N.';
@@ -1500,12 +1543,12 @@ function generarTextoLicenciasMultiples(licenciasData) {
                 const fechaInicio = crearFechaLocal(comp.fecha_inicio);
                 const fechaFin = crearFechaLocal(comp.fecha_fin);
                 
-                const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
+                const diasTexto = dias === 1 ? '1 (un) día' : `${dias} (${numeroATexto(dias)}) días`;
                 const fechasTexto = dias === 1 ?
                     `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
                     `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
                 
-                texto += `${diasTexto} por compensación (${comp.licencia_origen}), ${fechasTexto}.\n`;
+                texto += `• ${diasTexto} correspondiente a los días trabajados en ${comp.licencia_origen}, ${fechasTexto}.\n`;
             });
         } else {
             // Para licencias normales
@@ -1514,14 +1557,14 @@ function generarTextoLicenciasMultiples(licenciasData) {
             const fechaFin = licenciaData.fecha_fin ? crearFechaLocal(licenciaData.fecha_fin) : null;
             
             if (!fechaInicio || !fechaFin || isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-                texto += `Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
+                texto += `• Licencia por ${licencia.nombre.toLowerCase()} - [Fechas pendientes de completar].\n`;
             } else {
-                const diasTexto = dias === 1 ? 'un (1) día' : `${dias} (${numeroATexto(dias)}) días`;
+                const diasTexto = dias === 1 ? '1 (un) día' : `${dias} (${numeroATexto(dias)}) días`;
                 const fechasTexto = dias === 1 ?
                     `para el día ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}` :
                     `desde el ${fechaInicio.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })} hasta el ${fechaFin.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}`;
                 
-                texto += `${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
+                texto += `• ${diasTexto} por ${licencia.nombre.toLowerCase()}, ${fechasTexto}.\n`;
             }
         }
     });

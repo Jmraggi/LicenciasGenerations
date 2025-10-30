@@ -860,7 +860,7 @@ body {
 
 .compensacion-campos .form-row {
     display: grid;
-    grid-template-columns: 220px 150px 150px 150px 250px;
+    grid-template-columns: 220px 150px 150px 150px 220px;
     gap: var(--spacing-lg);
     align-items: start;
 }
@@ -954,10 +954,10 @@ body {
     margin-right: 4px;
 }
 
-/* Estilo específico para el selector de año principal */
-#ano_0_0 {
+/* Estilo para todos los selectores de año en compensaciones */
+select[id*="ano_"] {
     height: 27px !important;
-    font-size: 22px !important;
+    font-size: 16px !important;
     padding: 2px 8px !important;
 }
 
@@ -1085,7 +1085,7 @@ body {
     border: none;
     resize: vertical;
     font-family: 'Georgia', serif;
-    font-size: 13px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--text-primary);
     background: transparent;
