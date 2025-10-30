@@ -1475,7 +1475,7 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
             break;
         default:
             // Para licencias no especificadas, usar el artículo basado en el código
-            const numeroArticulo = obtenerArticuloLicencia(licencia.codigo);
+            const numeroArticulo = obtenerArticuloLicencia(licencia.nombre);
             articulo = `artículo ${numeroArticulo} de la Acordada 34/77`;
             motivo = licencia.nombre.toLowerCase();
     }
