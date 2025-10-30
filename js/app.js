@@ -1441,17 +1441,9 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
     let articulo, motivo;
     
     switch (licencia.codigo) {
-        case 'ART_34_INC_C':
-            articulo = 'artículo 34 inc. "c" de la Acordada 34/77';
-            motivo = 'motivos particulares';
-            break;
-        case 'ART_22':
-            articulo = 'artículo 22 de la Acordada 34/77';
-            motivo = 'enfermedad';
-            break;
-        case 'ART_23':
-            articulo = 'artículo 23 de la Acordada 34/77';
-            motivo = 'enfermedad de largo tratamiento';
+        case 'ART_14':
+            articulo = 'artículo 14 de la Acordada 34/77';
+            motivo = 'compensación';
             break;
         case 'ART_15':
             articulo = 'artículo 15 de la Acordada 34/77';
@@ -1469,15 +1461,87 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
             articulo = 'artículo 18 de la Acordada 34/77';
             motivo = 'fallecimiento de familiar';
             break;
+        case 'ART_19':
+            articulo = 'artículo 19 de la Acordada 34/77';
+            motivo = 'adopción';
+            break;
+        case 'ART_20':
+            articulo = 'artículo 20 de la Acordada 34/77';
+            motivo = 'maternidad';
+            break;
+        case 'ART_21':
+            articulo = 'artículo 21 de la Acordada 34/77';
+            motivo = 'accidente de trabajo';
+            break;
+        case 'ART_22':
+            articulo = 'artículo 22 de la Acordada 34/77';
+            motivo = 'enfermedad';
+            break;
+        case 'ART_23':
+            articulo = 'artículo 23 de la Acordada 34/77';
+            motivo = 'enfermedad de largo tratamiento';
+            break;
+        case 'ART_24':
+            articulo = 'artículo 24 de la Acordada 34/77';
+            motivo = 'actividad gremial';
+            break;
+        case 'ART_25':
+            articulo = 'artículo 25 de la Acordada 34/77';
+            motivo = 'actividad política';
+            break;
+        case 'ART_26':
+            articulo = 'artículo 26 de la Acordada 34/77';
+            motivo = 'citación judicial';
+            break;
+        case 'ART_27':
+            articulo = 'artículo 27 de la Acordada 34/77';
+            motivo = 'servicio militar';
+            break;
+        case 'ART_28':
+            articulo = 'artículo 28 de la Acordada 34/77';
+            motivo = 'donación de sangre';
+            break;
         case 'ART_29':
             articulo = 'artículo 29 de la Acordada 34/77';
             motivo = 'atención de familiar enfermo';
             break;
+        case 'ART_30':
+            articulo = 'artículo 30 de la Acordada 34/77';
+            motivo = 'mudanza';
+            break;
+        case 'ART_31':
+            articulo = 'artículo 31 de la Acordada 34/77';
+            motivo = 'cambio de horario';
+            break;
+        case 'ART_32':
+            articulo = 'artículo 32 de la Acordada 34/77';
+            motivo = 'horas extras';
+            break;
+        case 'ART_33':
+            articulo = 'artículo 33 de la Acordada 34/77';
+            motivo = 'actividades oficiales';
+            break;
+        case 'ART_34_INC_A':
+            articulo = 'artículo 34 inc. "a" de la Acordada 34/77';
+            motivo = 'licencia anual';
+            break;
+        case 'ART_34_INC_B':
+            articulo = 'artículo 34 inc. "b" de la Acordada 34/77';
+            motivo = 'días de estudio';
+            break;
+        case 'ART_34_INC_C':
+            articulo = 'artículo 34 inc. "c" de la Acordada 34/77';
+            motivo = 'motivos particulares';
+            break;
+        case 'ART_35':
+            articulo = 'artículo 35 de la Acordada 34/77';
+            motivo = 'licencia especial';
+            break;
         default:
             // Para licencias no especificadas, usar el artículo basado en el código
-            const numeroArticulo = obtenerArticuloLicencia(licencia.nombre);
+            const numeroArticulo = obtenerArticuloLicencia(licencia.codigo);
             articulo = `artículo ${numeroArticulo} de la Acordada 34/77`;
-            motivo = licencia.nombre.toLowerCase();
+            motivo = licencia.nombre ? licencia.nombre.toLowerCase() : 'licencia';
     }
     
     const diasTexto = dias === 1 ? `1 (un) día` : `${dias} (${numeroATexto(dias)}) días`;
@@ -1487,18 +1551,83 @@ function generarTextoLicenciaNormal(licencia, licenciaData) {
     
     let textoFinal;
     
-    // Formato especial para Art. 22 (Enfermedad) y Art. 29 (Familiar Enfermo)
-    if (licencia.codigo === 'ART_22' || licencia.codigo === 'ART_29') {
-        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
-    } else if (licencia.codigo === 'ART_20') {
-        // Art. 20 Maternidad - sin "trámites personales"
-        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
-    } else if (licencia.codigo === 'ART_34_INC_C') {
-        // Art. 33/34 Motivos Particulares - cambiar observaciones por motivos
-        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
-    } else {
-        // Formato estándar para otras licencias
-        textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido a la realización de trámites personales.`;
+    // Generar texto específico según el tipo de licencia
+    switch (licencia.codigo) {
+        case 'ART_14':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_15':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para la celebración de mi matrimonio.`;
+            break;
+        case 'ART_16':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para rendir el examen correspondiente.`;
+            break;
+        case 'ART_17':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, con motivo del nacimiento de mi hijo/a.`;
+            break;
+        case 'ART_18':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, con motivo del fallecimiento de mi familiar.`;
+            break;
+        case 'ART_19':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para realizar los trámites de adopción correspondientes.`;
+            break;
+        case 'ART_20':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_21':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, debido al accidente laboral sufrido.`;
+            break;
+        case 'ART_22':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_23':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para el tratamiento médico requerido.`;
+            break;
+        case 'ART_24':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para participar en actividades sindicales.`;
+            break;
+        case 'ART_25':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para ejercer actividad política autorizada.`;
+            break;
+        case 'ART_26':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para comparecer ante la autoridad judicial.`;
+            break;
+        case 'ART_27':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para cumplir con el servicio militar obligatorio.`;
+            break;
+        case 'ART_28':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para realizar la donación de sangre.`;
+            break;
+        case 'ART_29':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, tener por justificada mi inasistencia laboral por el termino de ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_30':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para realizar el cambio de domicilio.`;
+            break;
+        case 'ART_31':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para gestionar el cambio de horario laboral.`;
+            break;
+        case 'ART_32':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme compensación por las ${diasTexto} de horas extras trabajadas, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_33':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para cumplir con actividades oficiales asignadas.`;
+            break;
+        case 'ART_34_INC_A':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_34_INC_B':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, para dedicarme al estudio.`;
+            break;
+        case 'ART_34_INC_C':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
+        case 'ART_35':
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}, por circunstancias especiales debidamente justificadas.`;
+            break;
+        default:
+            textoFinal = `Tengo el honor de dirigirme a V.E, a fin de solicitarle, tenga a bien, concederme ${diasTexto} de licencia por ${motivo}, conforme lo permite el ${articulo} de la C.S.J.N., ${fechasTexto}.`;
+            break;
     }
     
     textoFinal += `\n\nSin otro particular, saludo a V.E. muy atentamente.-`;
